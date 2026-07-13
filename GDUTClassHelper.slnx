@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="GDUTClassHelper.Core/GDUTClassHelper.Core.csproj" Id="6c57460a-136f-4885-ad84-0bdc8e05facd" />
+  <Project Path="GDUTClassHelper.Desktop/GDUTClassHelper.Desktop.csproj" />
+</Solution>

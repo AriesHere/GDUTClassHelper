@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GDUTClassHelper.Core\GDUTClassHelper.Core.csproj" />
+    <ProjectReference Include="..\GDUTClassHelper.SourceGenerator\GDUTClassHelper.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(Configuration)' == 'Release'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="View\Pages\CalendarPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
+
+</Project>
