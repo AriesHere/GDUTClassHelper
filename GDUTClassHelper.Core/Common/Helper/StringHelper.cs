@@ -7,7 +7,7 @@ namespace GDUTClassHelper.Core.Common.Helper
 {
     public static class StringHelper
     {
-        /// <summary>Please make sure the quotes come in pairs, escape characters are not supported</summary>
+        /// <summary>Quotes must be paired. Escaped quotes are not handled.</summary>
         public static List<string> ExtractQuotedStrings(string source)
         {
             List<string> result = [];

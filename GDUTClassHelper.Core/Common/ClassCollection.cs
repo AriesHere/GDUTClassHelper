@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Net;
 using GDUTClassHelper.Core.Common.Helper;
+using Ical.Net;
+using Ical.Net.CalendarComponents;
 
 namespace GDUTClassHelper.Core.Common
 {
@@ -73,6 +75,24 @@ namespace GDUTClassHelper.Core.Common
                 collection.Add(newClass);
             }
             return collection;
+        }
+    }
+
+    // TODO
+    public static class ClassCollectionExtension
+    {
+        public static void ExportAsIcalendarJournal(this ClassCollection collection, string path)
+        {
+            Calendar calendar = new();
+            foreach (var item in collection)
+            {
+                Journal j = new()
+                {
+                    Name = item.Name,
+                    Description = item.Profile,
+                    Categories = [item.ClassType]
+                };
+            }
         }
     }
 }
