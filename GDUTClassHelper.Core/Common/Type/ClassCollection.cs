@@ -85,7 +85,36 @@ namespace GDUTClassHelper.Core.Common.Type
 
     public static class ClassCollectionExtension
     {
-        public static void ExportAsIcalendarJournal(this ClassCollection collection, PeriodCollection periodCollection, string path)
+        /// <summary>Get intersection of the two ClassCollection. If <paramref name="c1"/> is larger than <paramref name="c2"/>, this method has better performance</summary>
+        public static List<(Class Source, Class Target)> CompareTo(this ClassCollection c1, ClassCollection c2)
+        {
+            List<(Class Source, Class Target)> result = [];
+            int cur = 0;
+            int today = 0;
+            foreach (var item2 in c2)
+            {
+                for (; cur < c1.Count; cur++)
+                {
+                    if (c1[cur].Date == item2.Date)
+                    {
+                        today = cur;
+                        if (c1[cur].Periods.Intersect(item2.Periods).Any())
+                        {
+                            result.Add(new(c1[cur], item2));
+                            break;
+                        }
+                    }
+                    else if (c1[cur].Date > item2.Date)
+                    {
+                        cur = today;
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
+        public static void ExportAsIcalendarJournal(this ClassCollection collection, PeriodCollection pc, string path)
         {
             Calendar calendar = new();
             Alarm alarm = new()
@@ -105,8 +134,8 @@ namespace GDUTClassHelper.Core.Common.Type
                         Description = item.Profile,
                         Organizer = new(item.Teacher),
                         Categories = [item.ClassType],
-                        Start = new(new DateTime(item.Date, periodCollection.Periods[period].StartTime)),
-                        End = new(new DateTime(item.Date, periodCollection.Periods[period].EndTime)),
+                        Start = new(new DateTime(item.Date, pc.Periods[period].StartTime)),
+                        End = new(new DateTime(item.Date, pc.Periods[period].EndTime)),
                     };
                     e.Alarms.Add(alarm);
                     calendar.AddChild(e);
