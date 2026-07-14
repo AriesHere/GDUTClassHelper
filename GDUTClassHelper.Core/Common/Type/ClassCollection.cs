@@ -4,13 +4,13 @@ using System.Net;
 using GDUTClassHelper.Core.Common.Helper;
 using Ical.Net;
 using Ical.Net.CalendarComponents;
+using Ical.Net.DataTypes;
 
-namespace GDUTClassHelper.Core.Common
+namespace GDUTClassHelper.Core.Common.Type
 {
     public class ClassCollection : ICollection<Class>
     {
-        private readonly List<Class> _classes = [];
-        private readonly IComparer<Class> _comparer = Comparer<Class>.Create((a1, a2) => a1.Date.CompareTo(a2.Date));
+        #region ICollection
 
         public int Count => _classes.Count;
         public bool IsReadOnly => false;
@@ -43,10 +43,15 @@ namespace GDUTClassHelper.Core.Common
         public bool Contains(Class item) => _classes.BinarySearch(item, _comparer) >= 0;
         public void CopyTo(Class[] array, int arrayIndex) => _classes.CopyTo(array, arrayIndex);
 
-        public Class this[int index] => _classes[index];
-
         public IEnumerator<Class> GetEnumerator() => _classes.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        #endregion
+
+        private readonly List<Class> _classes = [];
+        private readonly IComparer<Class> _comparer = Comparer<Class>.Create((a1, a2) => a1.Date.CompareTo(a2.Date));
+
+        public Class this[int index] => _classes[index];
 
         public static ClassCollection ReadFromText(string path)
         {
@@ -78,20 +83,34 @@ namespace GDUTClassHelper.Core.Common
         }
     }
 
-    // TODO
     public static class ClassCollectionExtension
     {
-        public static void ExportAsIcalendarJournal(this ClassCollection collection, string path)
+        public static void ExportAsIcalendarJournal(this ClassCollection collection, PeriodCollection periodCollection, string path)
         {
             Calendar calendar = new();
+            Alarm alarm = new()
+            {
+                Summary = "Class",  // TODO: Globalization
+                Description = "Class starts in 15 minutes",
+                Action = AlarmAction.Display,
+                Trigger = new Trigger(new Duration(minutes: 15)),   // TODO: Customizable
+            };
             foreach (var item in collection)
             {
-                Journal j = new()
+                foreach (var period in item.Periods)
                 {
-                    Name = item.Name,
-                    Description = item.Profile,
-                    Categories = [item.ClassType]
-                };
+                    CalendarEvent e = new()
+                    {
+                        Summary = item.Name,
+                        Description = item.Profile,
+                        Organizer = new(item.Teacher),
+                        Categories = [item.ClassType],
+                        Start = new(new DateTime(item.Date, periodCollection.Periods[period].StartTime)),
+                        End = new(new DateTime(item.Date, periodCollection.Periods[period].EndTime)),
+                    };
+                    e.Alarms.Add(alarm);
+                    calendar.AddChild(e);
+                }
             }
         }
     }
