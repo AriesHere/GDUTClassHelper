@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using GDUTClassHelper.Core.Common.Helper;
 using Ical.Net;
 using Ical.Net.CalendarComponents;
@@ -80,6 +82,21 @@ namespace GDUTClassHelper.Core.Common.Type
                 collection.Add(newClass);
             }
             return collection;
+        }
+
+        public static ClassCollection ReadFromJson(string jsonString)
+        {
+            ClassCollection classes = [];
+            var j = JsonSerializer.Deserialize<ClassJsonWithHeader>(jsonString);
+            if (j == null) return classes;
+            else
+            {
+                foreach (var item in j.rows)
+                {
+                    classes.Add(item);
+                }
+                return classes;
+            }
         }
     }
 
