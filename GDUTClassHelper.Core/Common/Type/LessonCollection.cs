@@ -50,15 +50,18 @@ namespace GDUTClassHelper.Core.Common.Type
         #endregion
 
         private readonly List<Lesson> _lessons = [];
-        private readonly IComparer<Lesson> _comparer = Comparer<Lesson>.Create((a1, a2) => a1.Date.CompareTo(a2.Date));
+        private readonly IComparer<Lesson> _comparer = Comparer<Lesson>.Create((a1, a2) => a1.Week.CompareTo(a2.Week));
+
+        public DateOnly FirstDate { get; set; } = DateOnly.MinValue;
 
         public Lesson this[int index] => _lessons[index];
 
         public static LessonCollection ReadFromText(string path)
         {
             using TextReader reader = new StreamReader(path);
-            var collection = new LessonCollection();
-            reader.ReadLine(); // Skip header line
+            LessonCollection collection = [];
+            bool flag = true; 
+            reader.ReadLine();  // Skip header line
             while (reader.ReadLine() is string line)
             {
                 if (string.IsNullOrWhiteSpace(line)) continue;
@@ -78,12 +81,25 @@ namespace GDUTClassHelper.Core.Common.Type
                     LessonType = WebUtility.HtmlDecode(s[10]),
                     Profile = WebUtility.HtmlDecode(s[11]),
                 };
+                if (flag)
+                {
+                    if (newClass.Date != DateOnly.MinValue 
+                        && newClass.Week > 0
+                        && newClass.DayOfWeek > 0)
+                    {
+                        DateOnly firstDate = newClass.Date;
+                        int day = (newClass.Week - 1) * 7 + (newClass.DayOfWeek - 1);
+                        firstDate.AddDays(-day);
+                        collection.FirstDate = firstDate;
+                        flag = false;
+                    }
+                }
                 collection.Add(newClass);
             }
             return collection;
         }
 
-        public static LessonCollection ReadFromJson(string jsonString)
+        public static LessonCollection ReadFromJsonWithHeader(string jsonString)
         {
             LessonCollection lessons = [];
             try
@@ -94,18 +110,22 @@ namespace GDUTClassHelper.Core.Common.Type
                     foreach (var item in j.rows) lessons.Add(item);
                 }
             }
-            catch
+            catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json with header."); }
+            return lessons;
+        }
+
+        public static LessonCollection ReadFromJson(string jsonString)
+        {
+            LessonCollection lessons = [];
+            try
             {
-                try
+                var j = JsonSerializer.Deserialize<List<LessonJson>>(jsonString);
+                if (j is not null)
                 {
-                    var j = JsonSerializer.Deserialize<List<LessonJson>>(jsonString);
-                    if (j is not null)
-                    {
-                        foreach (var item in j) lessons.Add(item);
-                    }
+                    foreach (var item in j) lessons.Add(item);
                 }
-                catch { }
             }
+            catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json."); }
             return lessons;
         }
     }
@@ -113,16 +133,20 @@ namespace GDUTClassHelper.Core.Common.Type
     public static class LessonCollectionExtension
     {
         /// <summary>Get intersection of the two LessonCollection. If <paramref name="l1"/> is larger than <paramref name="l2"/>, this method has better performance</summary>
-        public static List<(Lesson Source, Lesson Target)> CompareTo(this LessonCollection l1, LessonCollection l2)
+        public static List<(Lesson Source, Lesson Target)> CompareTo(this LessonCollection l1, LessonCollection l2, bool forceCompare = false)
         {
             List<(Lesson Source, Lesson Target)> result = [];
+            if (l1.FirstDate != l2.FirstDate && !forceCompare)
+            {
+                return result;
+            }
             int cur = 0;
             int today = 0;
             foreach (var item2 in l2)
             {
                 for (; cur < l1.Count; cur++)
                 {
-                    if (l1[cur].Date == item2.Date)
+                    if (l1[cur].Week == item2.Week)
                     {
                         today = cur;
                         if (l1[cur].Sessions.Intersect(item2.Sessions).Any())
@@ -131,7 +155,7 @@ namespace GDUTClassHelper.Core.Common.Type
                             break;
                         }
                     }
-                    else if (l1[cur].Date > item2.Date)
+                    else if (l1[cur].Week > item2.Week)
                     {
                         cur = today;
                         break;
@@ -161,6 +185,7 @@ namespace GDUTClassHelper.Core.Common.Type
                         Description = item.Profile,
                         Organizer = new(item.Teacher),
                         Categories = [item.LessonType],
+                        // TODO
                         Start = new(new DateTime(item.Date, sc.Sessions[period].StartTime)),
                         End = new(new DateTime(item.Date, sc.Sessions[period].EndTime)),
                     };

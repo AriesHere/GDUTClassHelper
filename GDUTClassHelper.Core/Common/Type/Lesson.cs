@@ -10,7 +10,9 @@ public struct Lesson()
     public int DayOfWeek;
     public List<int> Sessions = [];
     public string Location = string.Empty;
-    public DateOnly Date;   // TODO: do not rely on it
+    public DateOnly Date;
+    /// <summary>Calculated through <see cref="LessonCollection.FirstDate"/></summary>
+    public DateOnly ActualDate;
     public int LessonSequence;
     public string LessonType = string.Empty;
     public string Profile = string.Empty;
@@ -28,6 +30,7 @@ public struct Lesson()
               - Sessions:{string.Join(",", Sessions)}
               - Location:{Location}
               - Date:{Date}
+              - ActualDate:{ActualDate}
               - LessonSequence:{LessonSequence}
               - LessonType:{LessonType}
               - Profile:{Profile}
