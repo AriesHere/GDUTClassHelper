@@ -55,37 +55,38 @@
         </Style>
     </Page.Resources>
 
-    <Grid>
-        <ScrollViewer>
-            <Canvas>
-                <StackPanel Name="CalendarHeader" Orientation="Horizontal">
-                    <TextBlock Text="Mon" ap:ValueTypesHelper.Int="0" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                    <TextBlock Text="Tue" ap:ValueTypesHelper.Int="1" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                    <TextBlock Text="Wed" ap:ValueTypesHelper.Int="2" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                    <TextBlock Text="Thu" ap:ValueTypesHelper.Int="3" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                    <TextBlock Text="Fri" ap:ValueTypesHelper.Int="4" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                    <TextBlock Text="Sat" ap:ValueTypesHelper.Int="5" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                    <TextBlock Text="Sun" ap:ValueTypesHelper.Int="6" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                </StackPanel>
-                <ItemsControl ItemsSource="{Binding ThisWeekLessons}"
-                              Canvas.Top="{Binding ActualHeight, ElementName=CalendarHeader}"
-                              ItemContainerStyle="{StaticResource LessonContainerStyle}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}"
-                                    Height="8000"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <ItemContainerTemplate>
-                            <StackPanel>
+    <StackPanel>
+        <Button Content="选择文件" Command="{Binding BrowseFileCommand}"/>
+        <Canvas>
+            <StackPanel Name="CalendarHeader" Orientation="Horizontal">
+                <TextBlock Text="Mon" ap:ValueTypesHelper.Int="0" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                <TextBlock Text="Tue" ap:ValueTypesHelper.Int="1" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                <TextBlock Text="Wed" ap:ValueTypesHelper.Int="2" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                <TextBlock Text="Thu" ap:ValueTypesHelper.Int="3" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                <TextBlock Text="Fri" ap:ValueTypesHelper.Int="4" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                <TextBlock Text="Sat" ap:ValueTypesHelper.Int="5" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                <TextBlock Text="Sun" ap:ValueTypesHelper.Int="6" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+            </StackPanel>
+            <ItemsControl ItemsSource="{Binding ThisWeekLessons}"
+                          Canvas.Top="{Binding ActualHeight, ElementName=CalendarHeader}"
+                          ItemContainerStyle="{StaticResource LessonContainerStyle}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}"
+                                Height="8000"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <ItemContainerTemplate>
+                        <Border Padding="1">
+                            <StackPanel Background="Cornsilk">
                                 <TextBlock Text="{Binding Name}"/>
-                                <TextBlock Text="{Binding DayOfWeek}"/>
+                                <TextBlock Text="{Binding Profile}"/>
                             </StackPanel>
-                        </ItemContainerTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Canvas>
-        </ScrollViewer>
-    </Grid>
+                        </Border>
+                    </ItemContainerTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Canvas>
+    </StackPanel>
 </Page>

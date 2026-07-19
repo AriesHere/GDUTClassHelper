@@ -24,8 +24,7 @@ namespace GDUTClassHelper.Desktop.ViewModel
         {
             if (value is CalendarPage)
             {
-                LessonCollection l = new();
-                value.DataContext = new CalendarPageVM(l);
+                value.DataContext = new CalendarPageVM();
             }
         }
     }

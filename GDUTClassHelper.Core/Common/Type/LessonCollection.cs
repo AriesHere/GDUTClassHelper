@@ -104,10 +104,10 @@ namespace GDUTClassHelper.Core.Common.Type
                 if (j is not null)
                 {
                     foreach (var item in j.rows) lessons.Add(item);
-                }
-                if (lessons.Count == j.total)
-                {
-                    lessons.IsIncomplete = false;
+                    if (lessons.Count == j.total)
+                    {
+                        lessons.IsIncomplete = false;
+                    }
                 }
             }
             catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json with header."); }
