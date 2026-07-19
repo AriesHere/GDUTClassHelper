@@ -23,23 +23,8 @@ namespace GDUTClassHelper.Core.Common.Type
             _lessons.Insert(index, item);
         }
 
-        public bool Remove(Lesson item)
-        {
-            int index = _lessons.BinarySearch(item, _comparer);
-            if (index < 0) return false;
-            _lessons.RemoveAt(index);
-            return true;
-        }
-
-        public void Update(Lesson item)
-        {
-            int oldIndex = _lessons.FindIndex(x => EqualityComparer<Lesson>.Default.Equals(x, item));
-            if (oldIndex < 0)
-                throw new ArgumentException("Item not found in collection.");
-            _lessons.RemoveAt(oldIndex);
-            Add(item);
-        }
-
+        public bool Remove(Lesson item) => throw new NotSupportedException();
+        public void Update(Lesson item) => throw new NotSupportedException();
         public void Clear() => _lessons.Clear();
         public bool Contains(Lesson item) => _lessons.BinarySearch(item, _comparer) >= 0;
         public void CopyTo(Lesson[] array, int arrayIndex) => _lessons.CopyTo(array, arrayIndex);
@@ -50,7 +35,14 @@ namespace GDUTClassHelper.Core.Common.Type
         #endregion
 
         private readonly List<Lesson> _lessons = [];
-        private readonly IComparer<Lesson> _comparer = Comparer<Lesson>.Create((a1, a2) => a1.Week.CompareTo(a2.Week));
+        private readonly IComparer<Lesson> _comparer = Comparer<Lesson>.Create((a, b) =>
+        {
+            int cmp = a.Week.CompareTo(b.Week);
+            if (cmp != 0) return cmp;
+            return a.DayOfWeek.CompareTo(b.DayOfWeek);
+        });
+
+        public bool IsIncomplete { get; private set; } = true;
 
         public DateOnly FirstDate { get; set; } = DateOnly.MinValue;
 
@@ -96,18 +88,26 @@ namespace GDUTClassHelper.Core.Common.Type
                 }
                 collection.Add(newClass);
             }
+            collection.IsIncomplete = false;
             return collection;
         }
 
-        public static LessonCollection ReadFromJsonWithHeader(string jsonString)
+        public static LessonCollection ReadFromJsonWithHeader(string jsonString, LessonCollection? lessons = null)
         {
-            LessonCollection lessons = [];
+            if (lessons is null)
+            {
+                lessons = [];
+            }
             try
             {
                 var j = JsonSerializer.Deserialize<LessonJsonWithHeader>(jsonString);
                 if (j is not null)
                 {
                     foreach (var item in j.rows) lessons.Add(item);
+                }
+                if (lessons.Count == j.total)
+                {
+                    lessons.IsIncomplete = false;
                 }
             }
             catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json with header."); }
@@ -126,6 +126,7 @@ namespace GDUTClassHelper.Core.Common.Type
                 }
             }
             catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json."); }
+            lessons.IsIncomplete = false;
             return lessons;
         }
     }

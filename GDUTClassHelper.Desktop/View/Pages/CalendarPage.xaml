@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:GDUTClassHelper.Desktop.View.Pages"
+      xmlns:sys="clr-namespace:System;assembly=System.Runtime"
       xmlns:vm="clr-namespace:GDUTClassHelper.Desktop.ViewModel.Pages"
       xmlns:converter="clr-namespace:GDUTClassHelper.Desktop.Common.Converter"
       xmlns:ap="clr-namespace:GDUTClassHelper.Desktop.Common.AttachedProperty"
@@ -13,35 +14,76 @@
       Title="CalendarPage">
 
     <Page.Resources>
+        <sys:Double x:Key="HeightOfSessions">64</sys:Double>
+
         <converter:ColumnPositionConverter x:Key="ColumnPositionConverter"/>
         <converter:DivideBy7Converter x:Key="DivideBy7Converter"/>
-        
+        <converter:SessionToHeightConverter x:Key="SessionToHeightConverter"/>
+        <converter:SessionToTopConverter x:Key="SessionToTopConverter"/>
+
         <Style x:Key="DayOfWeekHeaderStyle" TargetType="TextBlock">
             <Setter Property="Width" Value="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}, Converter={StaticResource DivideBy7Converter}}"/>
             <Setter Property="Canvas.Left">
                 <Setter.Value>
                     <MultiBinding Converter="{StaticResource ColumnPositionConverter}">
                         <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Canvas}"/>
-                        <Binding Path="(ap:ColumnHelper.Column)" RelativeSource="{RelativeSource Self}"/>
+                        <Binding Path="(ap:ValueTypesHelper.Int)" RelativeSource="{RelativeSource Self}"/>
                     </MultiBinding>
                 </Setter.Value>
             </Setter>
             <Setter Property="TextAlignment" Value="Center"/>
         </Style>
+
+        <Style x:Key="LessonContainerStyle" TargetType="ContentPresenter">
+            <Setter Property="Width" Value="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}, Converter={StaticResource DivideBy7Converter}}"/>
+            <Setter Property="Canvas.Left">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource ColumnPositionConverter}">
+                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Canvas}"/>
+                        <Binding Path="DayOfWeek"/>
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Canvas.Top">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource SessionToTopConverter}" ConverterParameter="1">
+                        <Binding Source="{StaticResource HeightOfSessions}"/>
+                        <Binding Path="Sessions"/>
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Page.Resources>
 
     <Grid>
         <ScrollViewer>
-            <Canvas Name="CalendarCanvas">
-                <TextBlock Text="Mon" ap:ColumnHelper.Column="0" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Tue" ap:ColumnHelper.Column="1" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Wed" ap:ColumnHelper.Column="2" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Thu" ap:ColumnHelper.Column="3" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Fri" ap:ColumnHelper.Column="4" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Sat" ap:ColumnHelper.Column="5" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Sun" ap:ColumnHelper.Column="6" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <ItemsControl>
-
+            <Canvas>
+                <StackPanel Name="CalendarHeader" Orientation="Horizontal">
+                    <TextBlock Text="Mon" ap:ValueTypesHelper.Int="0" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Tue" ap:ValueTypesHelper.Int="1" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Wed" ap:ValueTypesHelper.Int="2" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Thu" ap:ValueTypesHelper.Int="3" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Fri" ap:ValueTypesHelper.Int="4" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Sat" ap:ValueTypesHelper.Int="5" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Sun" ap:ValueTypesHelper.Int="6" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding ThisWeekLessons}"
+                              Canvas.Top="{Binding ActualHeight, ElementName=CalendarHeader}"
+                              ItemContainerStyle="{StaticResource LessonContainerStyle}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}"
+                                    Height="8000"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <ItemContainerTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}"/>
+                                <TextBlock Text="{Binding DayOfWeek}"/>
+                            </StackPanel>
+                        </ItemContainerTemplate>
+                    </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </Canvas>
         </ScrollViewer>

@@ -12,6 +12,6 @@
         <ListBox>
             
         </ListBox>
-        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" Source="{Binding SelectedPage}"/>
+        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" Content="{Binding SelectedPage}"/>
     </Grid>
 </Window>
