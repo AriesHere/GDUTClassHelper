@@ -14,7 +14,7 @@
       Title="CalendarPage">
 
     <Page.Resources>
-        <sys:Double x:Key="HeightOfSessions">64</sys:Double>
+        <sys:Double x:Key="HeightOfSessions">34</sys:Double>
 
         <converter:ColumnPositionConverter x:Key="ColumnPositionConverter"/>
         <converter:DivideBy7Converter x:Key="DivideBy7Converter"/>
@@ -36,6 +36,14 @@
 
         <Style x:Key="LessonContainerStyle" TargetType="ContentPresenter">
             <Setter Property="Width" Value="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}, Converter={StaticResource DivideBy7Converter}}"/>
+            <Setter Property="Height">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource SessionToHeightConverter}">
+                        <Binding Source="{StaticResource HeightOfSessions}"/>
+                        <Binding Path="Sessions"/>
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
             <Setter Property="Canvas.Left">
                 <Setter.Value>
                     <MultiBinding Converter="{StaticResource ColumnPositionConverter}">
@@ -46,7 +54,7 @@
             </Setter>
             <Setter Property="Canvas.Top">
                 <Setter.Value>
-                    <MultiBinding Converter="{StaticResource SessionToTopConverter}" ConverterParameter="1">
+                    <MultiBinding Converter="{StaticResource SessionToTopConverter}">
                         <Binding Source="{StaticResource HeightOfSessions}"/>
                         <Binding Path="Sessions"/>
                     </MultiBinding>
@@ -55,9 +63,8 @@
         </Style>
     </Page.Resources>
 
-    <StackPanel>
-        <Button Content="选择文件" Command="{Binding BrowseFileCommand}"/>
-        <Canvas>
+    <Grid ColumnDefinitions="*,auto,*">
+        <Canvas Grid.Column="0">
             <StackPanel Name="CalendarHeader" Orientation="Horizontal">
                 <TextBlock Text="Mon" ap:ValueTypesHelper.Int="0" Style="{StaticResource DayOfWeekHeaderStyle}"/>
                 <TextBlock Text="Tue" ap:ValueTypesHelper.Int="1" Style="{StaticResource DayOfWeekHeaderStyle}"/>
@@ -69,11 +76,12 @@
             </StackPanel>
             <ItemsControl ItemsSource="{Binding ThisWeekLessons}"
                           Canvas.Top="{Binding ActualHeight, ElementName=CalendarHeader}"
-                          ItemContainerStyle="{StaticResource LessonContainerStyle}">
+                          ItemContainerStyle="{StaticResource LessonContainerStyle}"
+                          Name="LessonsContainer">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}"
-                                Height="8000"/>
+                                Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Canvas}}"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -81,12 +89,15 @@
                         <Border Padding="1">
                             <StackPanel Background="Cornsilk">
                                 <TextBlock Text="{Binding Name}"/>
-                                <TextBlock Text="{Binding Profile}"/>
+                                <TextBlock Text="{Binding Teacher}"/>
                             </StackPanel>
                         </Border>
                     </ItemContainerTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Canvas>
-    </StackPanel>
+        <StackPanel Grid.Column="1">
+            <Button Content="选择文件" Command="{Binding BrowseFileCommand}"/>
+        </StackPanel>
+    </Grid>
 </Page>

@@ -77,7 +77,7 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
 
         public int DayOfWeek => _lesson.DayOfWeek - 1;
 
-        public string Profile => _lesson.Profile;
+        public string Teacher => _lesson.Teacher;
 
         public List<int> Sessions => _lesson.Sessions;
 
