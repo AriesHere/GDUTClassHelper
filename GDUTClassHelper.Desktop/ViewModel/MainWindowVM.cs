@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
-using GDUTClassHelper.Core.Common.Type;
 using GDUTClassHelper.Desktop.Common.Bases;
 using GDUTClassHelper.Desktop.View.Pages;
 using GDUTClassHelper.Desktop.ViewModel.Pages;
@@ -14,6 +9,8 @@ namespace GDUTClassHelper.Desktop.ViewModel
     public partial class MainWindowVM : ViewModelBase
     {
         [ObservableProperty] public partial Page SelectedPage { get; set; }
+
+        [ObservableProperty] public partial string StatusBarText { get; set; } = string.Empty;  // TODO: Status Bar
 
         public MainWindowVM()
         {

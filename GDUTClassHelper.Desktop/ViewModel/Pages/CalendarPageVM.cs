@@ -2,13 +2,12 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using GDUTClassHelper.Core.Common.Type;
-using Microsoft.Win32;
+using GDUTClassHelper.Desktop.Common.Bases;
 
 namespace GDUTClassHelper.Desktop.ViewModel.Pages
 {
-    public partial class CalendarPageVM : ObservableObject
+    public partial class CalendarPageVM : ViewModelBase
     {
         private LessonCollection _lessons = [];
 
@@ -55,16 +54,6 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
                 {
                     break;
                 }
-            }
-        }
-
-        [RelayCommand]
-        private void BrowseFile()
-        {
-            OpenFileDialog dialog = new();
-            if (dialog.ShowDialog() == true)
-            {
-                CurrentFilePath = dialog.FileName;
             }
         }
     }

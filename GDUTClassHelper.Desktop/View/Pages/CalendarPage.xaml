@@ -97,7 +97,7 @@
             </ItemsControl>
         </Canvas>
         <StackPanel Grid.Column="1">
-            <Button Content="选择文件" Command="{Binding BrowseFileCommand}"/>
+            <!-- TODO -->
         </StackPanel>
     </Grid>
 </Page>

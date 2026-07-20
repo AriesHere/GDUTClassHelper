@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.Data;
+﻿using System.IO;
 using System.Windows;
 
 namespace GDUTClassHelper.Desktop
@@ -9,6 +8,12 @@ namespace GDUTClassHelper.Desktop
     /// </summary>
     public partial class App : Application
     {
+        public static readonly string DataFileDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+
+        App()
+        {
+            Directory.CreateDirectory(DataFileDir);
+        }
     }
 
 }

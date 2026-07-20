@@ -4,11 +4,24 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:GDUTClassHelper.Desktop.View.Pages"
+      xmlns:vm="clr-namespace:GDUTClassHelper.Desktop.ViewModel.Pages"
       mc:Ignorable="d" 
+      d:DataContext="{d:DesignInstance vm:DataPageVM}"
       d:DesignHeight="450" d:DesignWidth="800"
       Title="DataPage">
 
-    <Grid>
-        
+    <Grid ColumnDefinitions="*,2*">
+        <StackPanel Grid.Column="0">
+            <Button Content="读取并解析文件" Command="{Binding BrowseAndAnaylsisFileCommand}"/>
+            <Grid ColumnDefinitions="auto,*">
+                <Button Grid.Column="0" Content="保存数据" Command="{Binding SaveDataCommand}"/>
+                <TextBox Grid.Column="1" Text="{Binding SaveFileName}" VerticalContentAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="在此输入保存的文件名" Foreground="Gray" VerticalAlignment="Center"/>
+            </Grid>
+        </StackPanel>
+        <Grid Grid.Column="1" RowDefinitions="auto,*">
+            <Button Grid.Row="0" Content="刷新" Command="{Binding RefreshFileNameListCommand}"/>
+            <ListBox Grid.Row="1" SelectionMode="Multiple" ItemsSource="{Binding FileNameList}" SelectedItem="{Binding SelectedFileNameList}"/>
+        </Grid>
     </Grid>
 </Page>
