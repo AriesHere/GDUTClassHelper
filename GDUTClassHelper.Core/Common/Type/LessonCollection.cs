@@ -15,12 +15,15 @@ namespace GDUTClassHelper.Core.Common.Type
 
         public int Count => _lessons.Count;
         public bool IsReadOnly => false;
-
+        
         public void Add(Lesson item)
         {
-            int index = _lessons.BinarySearch(item, _comparer);
-            if (index < 0) index = ~index;
-            _lessons.Insert(index, item);
+            if (!IsReadOnly)
+            {
+                int index = _lessons.BinarySearch(item, _comparer);
+                if (index < 0) index = ~index;
+                _lessons.Insert(index, item);
+            }
         }
 
         public bool Remove(Lesson item) => throw new NotSupportedException();
@@ -41,8 +44,12 @@ namespace GDUTClassHelper.Core.Common.Type
             if (cmp != 0) return cmp;
             return a.DayOfWeek.CompareTo(b.DayOfWeek);
         });
+        private BitArray? _readFlag = null;
 
-        public bool IsIncomplete { get; private set; } = true;
+        /// <remarks>
+        /// null => Indeterminate
+        /// </remarks>
+        public bool? IsComplete { get; private set; } = null;
 
         public DateOnly FirstDate { get; set; } = DateOnly.MinValue;
 
@@ -88,45 +95,47 @@ namespace GDUTClassHelper.Core.Common.Type
                 }
                 collection.Add(newClass);
             }
-            collection.IsIncomplete = false;
             return collection;
         }
 
         public static LessonCollection ReadFromJsonWithHeader(string jsonString, LessonCollection? lessons = null)
         {
-            if (lessons is null)
+            lessons ??= [];
+            LessonJsonWithHeader? json;
+            try { json = JsonSerializer.Deserialize<LessonJsonWithHeader>(jsonString); }
+            catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json with header."); }
+            if (json is not null)
             {
-                lessons = [];
-            }
-            try
-            {
-                var j = JsonSerializer.Deserialize<LessonJsonWithHeader>(jsonString);
-                if (j is not null)
+                lessons._readFlag ??= new(json.total, false);
+                if (json.total != lessons._readFlag.Count)
                 {
-                    foreach (var item in j.rows) lessons.Add(item);
-                    if (lessons.Count == j.total)
+                    throw new InvalidDataException("Conflicts between input data header (total) and existing LessonCollection.Count.");
+                }
+                foreach (var item in json.rows)
+                {
+                    var index = int.Parse(item.rownum_) - 1;
+                    if (!lessons._readFlag[index])
                     {
-                        lessons.IsIncomplete = false;
+                        lessons.Add(item);
+                        lessons._readFlag[index] = true;
                     }
                 }
+                lessons.IsComplete = (lessons.Count == json.total);
+
             }
-            catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json with header."); }
             return lessons;
         }
 
         public static LessonCollection ReadFromJson(string jsonString)
         {
             LessonCollection lessons = [];
-            try
-            {
-                var j = JsonSerializer.Deserialize<List<LessonJson>>(jsonString);
-                if (j is not null)
-                {
-                    foreach (var item in j) lessons.Add(item);
-                }
-            }
+            List<LessonJson>? json;
+            try { json = JsonSerializer.Deserialize<List<LessonJson>>(jsonString); }
             catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json."); }
-            lessons.IsIncomplete = false;
+            if (json is not null)
+            {
+                foreach (var item in json) lessons.Add(item);
+            }
             return lessons;
         }
     }

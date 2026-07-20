@@ -55,7 +55,7 @@ namespace GDUTClassHelper.Core.Common.Type
         /// <summary><see cref="Lesson.Date"/></summary>
         public DateOnly pkrq { get; set; }
 
-        /// <remarks>Just ignore it</remarks>
+        /// <remarks><see cref="LessonCollection.IsComplete"/></remarks>
         public string rownum_ { get; set; } = string.Empty;
 
         public static implicit operator Lesson(LessonJson j)
