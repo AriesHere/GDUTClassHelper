@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,12 +13,12 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
     public partial class DataPageVM(MainWindowVM mainVM) : ViewModelBase
     {
         [ObservableProperty] public partial string SaveFileName { get; set; } = string.Empty;
-        partial void OnSaveFileNameChanged(string value)
+        partial void OnSaveFileNameChanging(string value)
         {
-            IsShowHintText = string.IsNullOrEmpty(value) ? Visibility.Visible : Visibility.Collapsed;
+            HintTextVisibility = string.IsNullOrEmpty(value) ? Visibility.Visible : Visibility.Collapsed;
         }
-        [ObservableProperty] public partial Visibility IsShowHintText { get; set; } = Visibility.Visible;
-        [ObservableProperty] public partial List<string> FileNameList { get; set; } = [];
+        [ObservableProperty] public partial Visibility HintTextVisibility { get; set; } = Visibility.Visible;
+        public ObservableCollection<string> FileNameList { get; set; } = [];
 
         public ObservableCollection<string> SelectedFileNameList { get; set; } = [];
 
@@ -64,6 +65,7 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             {
                 StreamWriter writer = new(Path.Combine(App.DataFileDir, SaveFileName));
                 writer.Write(lessons);
+                mainVM.Status = new($"保存成功", StatusBarInfoType.Succeeded);
             }
             catch (Exception e)
             {
@@ -75,7 +77,15 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
         private void RefreshFileNameList()
         {
             FileNameList.Clear();
-            FileNameList = [..Directory.GetFiles(App.DataFileDir)];
+            var f = Directory.GetFiles(App.DataFileDir);
+            if (f is not null && f.Length > 0)
+            {
+                var index = App.DataFileDir.Length + 1;
+                foreach (var item in f)
+                {
+                    FileNameList.Add(item[index..]);
+                }
+            }
         }
     }
 }

@@ -29,7 +29,7 @@ namespace GDUTClassHelper.Desktop.ViewModel
         }
         [ObservableProperty] public partial Page CurrentPage { get; set; }
         [ObservableProperty] public partial string StatusBarText { get; private set; } = string.Empty;
-        [ObservableProperty] public partial Brush StatusBarColor { get; private set; } = Brushes.LightSeaGreen;
+        [ObservableProperty] public partial Brush StatusBarColor { get; private set; } = Brushes.Transparent;
         [ObservableProperty] public partial StatusBarInfo Status { get; set; }
         partial void OnStatusChanged(StatusBarInfo value)
         {

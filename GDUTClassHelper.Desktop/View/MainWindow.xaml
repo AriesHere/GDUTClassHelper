@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:GDUTClassHelper.Desktop.ViewModel"
         d:DataContext="{d:DesignInstance vm:MainWindowVM}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="GDUTClassHelper" Height="450" Width="800">
     <Grid RowDefinitions="*,auto">
         <Grid Grid.Row="0" ColumnDefinitions="auto,*">
             <ListBox Grid.Column="0" SelectedItem="{Binding SelectedItem}" ItemsSource="{Binding Pages}"/>

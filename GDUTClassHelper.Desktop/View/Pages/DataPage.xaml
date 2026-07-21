@@ -15,8 +15,8 @@
             <Button Content="读取并解析文件" Command="{Binding BrowseAndAnaylsisFileCommand}"/>
             <Grid ColumnDefinitions="auto,*">
                 <Button Grid.Column="0" Content="保存数据" Command="{Binding SaveDataCommand}"/>
-                <TextBox Grid.Column="1" Text="{Binding SaveFileName}" VerticalContentAlignment="Center"/>
-                <TextBlock Grid.Column="1" Text="在此输入保存的文件名" Foreground="Gray" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Text="{Binding SaveFileName, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="在此输入保存的文件名" IsHitTestVisible="False" Foreground="Gray" Visibility="{Binding HintTextVisibility}" VerticalAlignment="Center"/>
             </Grid>
         </StackPanel>
         <Grid Grid.Column="1" RowDefinitions="auto,*">
