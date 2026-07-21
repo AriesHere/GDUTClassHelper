@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
-using CommunityToolkit.Mvvm.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GDUTClassHelper.Core.Common.Type;
@@ -12,7 +9,7 @@ using Microsoft.Win32;
 
 namespace GDUTClassHelper.Desktop.ViewModel.Pages
 {
-    public partial class DataPageVM : ViewModelBase
+    public partial class DataPageVM(MainWindowVM mainVM) : ViewModelBase
     {
         [ObservableProperty] public partial string SaveFileName { get; set; } = string.Empty;
         partial void OnSaveFileNameChanged(string value)
@@ -25,12 +22,7 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
         public ObservableCollection<string> SelectedFileNameList { get; set; } = [];
 
         private LessonCollection lessons = [];
-        private MainWindowVM mainVM;
-
-        public DataPageVM(MainWindowVM mainVM)
-        {
-            this.mainVM = mainVM;
-        }
+        private readonly MainWindowVM mainVM = mainVM;
 
         [RelayCommand]
         private void BrowseAndAnaylsisFile()
@@ -57,7 +49,9 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
                         try { lessons = LessonCollection.ReadFromText(f); }
                         catch (Exception e) { error = e.Message; }
                     }
-                    mainVM.StatusBarText = lessons.Count > 0 ? "解析完成，请及时保存数据，否则可能会被后续数据覆盖" : $"读取时发生错误。{error}";
+                    
+                    if (lessons.Count > 0) mainVM.Status = new("解析完成，请及时保存数据，否则可能会被后续数据覆盖", StatusBarInfoType.Succeeded);
+                    else mainVM.Status = new($"读取时发生错误。{error}", StatusBarInfoType.Errored);
                 }
             }
             RefreshFileNameList();
@@ -73,7 +67,7 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             }
             catch (Exception e)
             {
-                mainVM.StatusBarText = $"保存失败。{e.Message}";
+                mainVM.Status = new($"保存失败。{e.Message}", StatusBarInfoType.Errored);
             }
         }
 

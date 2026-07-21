@@ -60,7 +60,9 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
 
     public partial class LessonWrapper(Lesson lesson) : ObservableObject
     {
+#pragma warning disable CS9124
         private Lesson _lesson { get; set; } = lesson;
+#pragma warning restore CS9124
 
         public string Name => lesson.Name;
 

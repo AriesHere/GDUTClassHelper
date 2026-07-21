@@ -8,10 +8,14 @@
         d:DataContext="{d:DesignInstance vm:MainWindowVM}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <ListBox>
-            
-        </ListBox>
-        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" Content="{Binding SelectedPage}"/>
+    <Grid RowDefinitions="*,auto">
+        <Grid Grid.Row="0" ColumnDefinitions="auto,*">
+            <ListBox Grid.Column="0" SelectedItem="{Binding SelectedItem}" ItemsSource="{Binding Pages}"/>
+            <Frame Grid.Column="1" NavigationUIVisibility="Hidden" Content="{Binding CurrentPage}"/>
+        </Grid>
+        <Grid Grid.Row="1" ColumnDefinitions="auto,*">
+            <Rectangle Grid.Column="0" Fill="{Binding StatusBarColor}" Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"/>
+            <TextBlock Grid.Column="1" Text="{Binding StatusBarText}" HorizontalAlignment="Stretch"/>
+        </Grid>
     </Grid>
 </Window>
