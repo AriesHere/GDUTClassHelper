@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Net;
 using System.Text.Json;
 using GDUTClassHelper.Core.Common.Helper;
@@ -13,47 +12,48 @@ namespace GDUTClassHelper.Core.Common.Type
     {
         #region ICollection
 
-        public int Count => _lessons.Count;
+        public int Count => Lessons.Count;
         public bool IsReadOnly => false;
         
         public void Add(Lesson item)
         {
             if (!IsReadOnly)
             {
-                int index = _lessons.BinarySearch(item, _comparer);
+                int index = Lessons.BinarySearch(item, _comparer);
                 if (index < 0) index = ~index;
-                _lessons.Insert(index, item);
+                Lessons.Insert(index, item);
             }
         }
 
         public bool Remove(Lesson item) => throw new NotSupportedException();
         public void Update(Lesson item) => throw new NotSupportedException();
-        public void Clear() => _lessons.Clear();
-        public bool Contains(Lesson item) => _lessons.BinarySearch(item, _comparer) >= 0;
-        public void CopyTo(Lesson[] array, int arrayIndex) => _lessons.CopyTo(array, arrayIndex);
+        public void Clear() => Lessons.Clear();
+        public bool Contains(Lesson item) => Lessons.BinarySearch(item, _comparer) >= 0;
+        public void CopyTo(Lesson[] array, int arrayIndex) => Lessons.CopyTo(array, arrayIndex);
 
-        public IEnumerator<Lesson> GetEnumerator() => _lessons.GetEnumerator();
+        public IEnumerator<Lesson> GetEnumerator() => Lessons.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         #endregion
 
-        private readonly List<Lesson> _lessons = [];
         private readonly IComparer<Lesson> _comparer = Comparer<Lesson>.Create((a, b) =>
         {
             int cmp = a.Week.CompareTo(b.Week);
             if (cmp != 0) return cmp;
             return a.DayOfWeek.CompareTo(b.DayOfWeek);
         });
-        private BitArray? _readFlag = null;
 
-        /// <remarks>
-        /// null => Indeterminate
-        /// </remarks>
-        public bool? IsComplete { get; private set; } = null;
+        public List<Lesson> Lessons { get; set; } = [];
+
+        public bool[]? ReadFlag { get; set; } = null;   // TODO: Save this
+
+        public Status Status { get; set; } = Status.Indeterminate;
 
         public DateOnly FirstDate { get; set; } = DateOnly.MinValue;
 
-        public Lesson this[int index] => _lessons[index];
+        public Lesson this[int index] => Lessons[index];
+
+        #region Read
 
         public static LessonCollection ReadFromText(string path)
         {
@@ -106,22 +106,21 @@ namespace GDUTClassHelper.Core.Common.Type
             catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json with header."); }
             if (json is not null)
             {
-                lessons._readFlag ??= new(json.total, false);
-                if (json.total != lessons._readFlag.Count)
+                lessons.ReadFlag ??= new bool[json.total];
+                if (json.total != lessons.ReadFlag.Length)
                 {
                     throw new InvalidDataException("Conflicts between input data header (total) and existing LessonCollection.Count.");
                 }
                 foreach (var item in json.rows)
                 {
                     var index = int.Parse(item.rownum_) - 1;
-                    if (!lessons._readFlag[index])
+                    if (!lessons.ReadFlag[index])
                     {
                         lessons.Add(item);
-                        lessons._readFlag[index] = true;
+                        lessons.ReadFlag[index] = true;
                     }
                 }
-                lessons.IsComplete = (lessons.Count == json.total);
-
+                lessons.Status = (lessons.Count == json.total) ? Status.Complete : Status.Incomplete;
             }
             return lessons;
         }
@@ -137,6 +136,39 @@ namespace GDUTClassHelper.Core.Common.Type
                 foreach (var item in json) lessons.Add(item);
             }
             return lessons;
+        }
+
+        #endregion
+
+        public void Save(string path)
+        {
+            using FileStream f = new(path, FileMode.Create);
+            using BinaryWriter w = new(f);
+            w.Write((int)this.Status);
+            w.Write(this.FirstDate.DayNumber);
+            var readFlagJson = JsonSerializer.Serialize(this.ReadFlag);
+            w.Write(readFlagJson);
+            var lessonJson = JsonSerializer.Serialize(this.Lessons, StringHelper.SerializerOptions);
+            w.Write(lessonJson);
+        }
+
+        public static LessonCollection Load(string path)
+        {
+            LessonCollection l = [];
+            using FileStream f = new(path, FileMode.Open);
+            using BinaryReader w = new(f);
+            l.Status = (Status)w.ReadInt32();
+            l.FirstDate = DateOnly.FromDayNumber(w.ReadInt32());
+            l.ReadFlag = JsonSerializer.Deserialize<bool[]>(w.ReadString());
+            l.Lessons = JsonSerializer.Deserialize<List<Lesson>>(w.ReadString())!;
+            return l;
+        }
+
+        public static int GetStatus(string path)
+        {
+            using FileStream f = new(path, FileMode.Open);
+            using BinaryReader w = new(f);
+            return w.ReadInt32();
         }
     }
 
@@ -204,5 +236,12 @@ namespace GDUTClassHelper.Core.Common.Type
                 }
             }
         }
+    }
+
+    public enum Status
+    {
+        Indeterminate,
+        Incomplete,
+        Complete,
     }
 }

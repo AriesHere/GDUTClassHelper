@@ -10,7 +10,7 @@ using Microsoft.Win32;
 
 namespace GDUTClassHelper.Desktop.ViewModel.Pages
 {
-    public partial class DataPageVM(MainWindowVM mainVM) : ViewModelBase
+    public partial class DataPageVM : ViewModelBase
     {
         [ObservableProperty] public partial string SaveFileName { get; set; } = string.Empty;
         partial void OnSaveFileNameChanging(string value)
@@ -18,12 +18,17 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             HintTextVisibility = string.IsNullOrEmpty(value) ? Visibility.Visible : Visibility.Collapsed;
         }
         [ObservableProperty] public partial Visibility HintTextVisibility { get; set; } = Visibility.Visible;
-        public ObservableCollection<string> FileNameList { get; set; } = [];
 
-        public ObservableCollection<string> SelectedFileNameList { get; set; } = [];
+        public ObservableCollection<ItemsControlItem> FileNameList { get; set; } = [];
 
         private LessonCollection lessons = [];
-        private readonly MainWindowVM mainVM = mainVM;
+        private readonly MainWindowVM mainVM;
+
+        public DataPageVM(MainWindowVM mainVM)
+        {
+            this.mainVM = mainVM;
+            RefreshFileNameList();
+        }
 
         [RelayCommand]
         private void BrowseAndAnaylsisFile()
@@ -63,9 +68,9 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
         {
             try
             {
-                StreamWriter writer = new(Path.Combine(App.DataFileDir, SaveFileName));
-                writer.Write(lessons);
+                lessons.Save(Path.Combine(App.DataFileDir, SaveFileName));
                 mainVM.Status = new($"保存成功", StatusBarInfoType.Succeeded);
+                RefreshFileNameList();
             }
             catch (Exception e)
             {
@@ -83,9 +88,41 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
                 var index = App.DataFileDir.Length + 1;
                 foreach (var item in f)
                 {
-                    FileNameList.Add(item[index..]);
+                    using FileStream fileStream = new(item, FileMode.Open, FileAccess.Read, FileShare.Read, sizeof(int));
+                    using BinaryReader reader = new(fileStream);
+                    FileNameList.Add(new(item[index..], (Status)reader.ReadInt32()));
                 }
             }
         }
+
+        [RelayCommand]
+        private void OpenDataDir()
+        {
+            if (Directory.Exists(App.DataFileDir))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(App.DataFileDir) { UseShellExecute = true });
+                    mainVM.Status = new("", StatusBarInfoType.None);
+                }
+                catch (Exception e)
+                {
+                    mainVM.Status = new($"打开失败。{e.Message}", StatusBarInfoType.Errored);
+                }
+            }
+            else
+            {
+                mainVM.Status = new("目标文件夹不存在", StatusBarInfoType.Errored);
+            }
+        }
+    }
+
+    public struct ItemsControlItem(string name, Status status = Status.Indeterminate, bool isSelected = false)
+    {
+        public string Name { get; set; } = name;
+        public Status Status { get; set; } = status;
+        public bool IsSelected { get; set; } = isSelected;
+
+        public static implicit operator ItemsControlItem(string s) => new(s);
     }
 }

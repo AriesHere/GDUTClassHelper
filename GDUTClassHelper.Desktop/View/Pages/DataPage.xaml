@@ -15,13 +15,28 @@
             <Button Content="读取并解析文件" Command="{Binding BrowseAndAnaylsisFileCommand}"/>
             <Grid ColumnDefinitions="auto,*">
                 <Button Grid.Column="0" Content="保存数据" Command="{Binding SaveDataCommand}"/>
-                <TextBox Grid.Column="1" Text="{Binding SaveFileName, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
+                <TextBox Grid.Column="1" Text="{Binding SaveFileName, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding SaveDataCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
                 <TextBlock Grid.Column="1" Text="在此输入保存的文件名" IsHitTestVisible="False" Foreground="Gray" Visibility="{Binding HintTextVisibility}" VerticalAlignment="Center"/>
             </Grid>
+            <Button Content="打开数据文件夹" Command="{Binding OpenDataDirCommand}"/>
         </StackPanel>
         <Grid Grid.Column="1" RowDefinitions="auto,*">
-            <Button Grid.Row="0" Content="刷新" Command="{Binding RefreshFileNameListCommand}"/>
-            <ListBox Grid.Row="1" SelectionMode="Multiple" ItemsSource="{Binding FileNameList}" SelectedItem="{Binding SelectedFileNameList}"/>
+            <Button Grid.Row="0" Content="刷新/清空选择" Command="{Binding RefreshFileNameListCommand}"/>
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding FileNameList}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox IsChecked="{Binding IsSelected}"/>
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock><Run Text=" ["/><Run Text="{Binding Status}"/><Run Text="] "/></TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
     </Grid>
 </Page>
