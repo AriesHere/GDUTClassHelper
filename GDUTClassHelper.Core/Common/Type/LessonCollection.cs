@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 using GDUTClassHelper.Core.Common.Helper;
@@ -45,13 +46,14 @@ namespace GDUTClassHelper.Core.Common.Type
 
         public List<Lesson> Lessons { get; set; } = [];
 
-        public bool[]? ReadFlag { get; set; } = null;   // TODO: Save this
-
-        public Status Status { get; set; } = Status.Indeterminate;
-
-        public DateOnly FirstDate { get; set; } = DateOnly.MinValue;
-
         public Lesson this[int index] => Lessons[index];
+
+        /// <summary>
+        /// If Total > 0, <see cref="GetReadFlag"/> return not null value.
+        /// </summary>
+        public int Total = 0;
+        public Status Status = Status.Indeterminate;
+        public DateOnly FirstDate = DateOnly.MinValue;
 
         #region Read
 
@@ -102,24 +104,11 @@ namespace GDUTClassHelper.Core.Common.Type
         {
             lessons ??= [];
             LessonJsonWithHeader? json;
-            try { json = JsonSerializer.Deserialize<LessonJsonWithHeader>(jsonString); }
-            catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json with header."); }
+            json = JsonSerializer.Deserialize<LessonJsonWithHeader>(jsonString);
             if (json is not null)
             {
-                lessons.ReadFlag ??= new bool[json.total];
-                if (json.total != lessons.ReadFlag.Length)
-                {
-                    throw new InvalidDataException("Conflicts between input data header (total) and existing LessonCollection.Count.");
-                }
-                foreach (var item in json.rows)
-                {
-                    var index = int.Parse(item.rownum_) - 1;
-                    if (!lessons.ReadFlag[index])
-                    {
-                        lessons.Add(item);
-                        lessons.ReadFlag[index] = true;
-                    }
-                }
+                foreach (var item in json.rows) lessons.Add(item);
+                lessons.Total = json.total;
                 lessons.Status = (lessons.Count == json.total) ? Status.Complete : Status.Incomplete;
             }
             return lessons;
@@ -128,9 +117,9 @@ namespace GDUTClassHelper.Core.Common.Type
         public static LessonCollection ReadFromJson(string jsonString)
         {
             LessonCollection lessons = [];
+            Debug.WriteLine(jsonString);
             List<LessonJson>? json;
-            try { json = JsonSerializer.Deserialize<List<LessonJson>>(jsonString); }
-            catch { throw new InvalidDataException("An error occurs when trying to deserialize lesson json."); }
+            json = JsonSerializer.Deserialize<List<LessonJson>>(jsonString);
             if (json is not null)
             {
                 foreach (var item in json) lessons.Add(item);
@@ -145,9 +134,8 @@ namespace GDUTClassHelper.Core.Common.Type
             using FileStream f = new(path, FileMode.Create);
             using BinaryWriter w = new(f);
             w.Write((int)this.Status);
+            w.Write(this.Total);
             w.Write(this.FirstDate.DayNumber);
-            var readFlagJson = JsonSerializer.Serialize(this.ReadFlag);
-            w.Write(readFlagJson);
             var lessonJson = JsonSerializer.Serialize(this.Lessons, StringHelper.SerializerOptions);
             w.Write(lessonJson);
         }
@@ -158,17 +146,28 @@ namespace GDUTClassHelper.Core.Common.Type
             using FileStream f = new(path, FileMode.Open);
             using BinaryReader w = new(f);
             l.Status = (Status)w.ReadInt32();
+            l.Total = w.ReadInt32();
             l.FirstDate = DateOnly.FromDayNumber(w.ReadInt32());
-            l.ReadFlag = JsonSerializer.Deserialize<bool[]>(w.ReadString());
             l.Lessons = JsonSerializer.Deserialize<List<Lesson>>(w.ReadString())!;
             return l;
         }
 
-        public static int GetStatus(string path)
+        public static Status GetStatusFromFile(string path)
         {
-            using FileStream f = new(path, FileMode.Open);
+            using FileStream f = new(path, FileMode.Open, FileAccess.Read, FileShare.Read, sizeof(int));
             using BinaryReader w = new(f);
-            return w.ReadInt32();
+            return (Status)w.ReadInt32();
+        }
+
+        public BitArray? GetReadFlag()
+        {
+            BitArray br = new(this.Total, false);
+            foreach (var item in this)
+            {
+                if (item.Number == -1) return null;
+                else br[item.Number - 1] = true;
+            }
+            return br;
         }
     }
 

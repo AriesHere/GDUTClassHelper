@@ -55,7 +55,7 @@ namespace GDUTClassHelper.Core.Common.Type
         /// <summary><see cref="Lesson.Date"/></summary>
         public DateOnly pkrq { get; set; }
 
-        /// <remarks><see cref="LessonCollection.IsComplete"/></remarks>
+        /// <remarks><see cref="Lesson.Number"/></remarks>
         public string rownum_ { get; set; } = string.Empty;
 
         public static implicit operator Lesson(LessonJson j)
@@ -85,6 +85,10 @@ namespace GDUTClassHelper.Core.Common.Type
             else
             {
                 lesson.Sessions = StringHelper.SplitByCharacterCount(j.jcdm, 2);
+            }
+            if (j.rownum_ != "")
+            {
+                lesson.Number = int.Parse(j.rownum_);
             }
             return lesson;
         }

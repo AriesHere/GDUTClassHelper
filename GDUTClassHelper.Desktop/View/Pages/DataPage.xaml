@@ -22,6 +22,7 @@
                 </TextBox>
                 <TextBlock Grid.Column="1" Text="在此输入保存的文件名" IsHitTestVisible="False" Foreground="Gray" Visibility="{Binding HintTextVisibility}" VerticalAlignment="Center"/>
             </Grid>
+            <Button Content="并入选中文件" Command="{Binding MergeIntoSeletedFileCommand}"/>
             <Button Content="打开数据文件夹" Command="{Binding OpenDataDirCommand}"/>
         </StackPanel>
         <Grid Grid.Column="1" RowDefinitions="auto,*">
@@ -30,7 +31,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <CheckBox IsChecked="{Binding IsSelected}"/>
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
                             <TextBlock Text="{Binding Name}"/>
                             <TextBlock><Run Text=" ["/><Run Text="{Binding Status}"/><Run Text="] "/></TextBlock>
                         </StackPanel>

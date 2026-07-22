@@ -30,18 +30,21 @@ namespace GDUTClassHelper.Desktop.ViewModel
         [ObservableProperty] public partial Page CurrentPage { get; set; }
         [ObservableProperty] public partial string StatusBarText { get; private set; } = string.Empty;
         [ObservableProperty] public partial Brush StatusBarColor { get; private set; } = Brushes.Transparent;
-        [ObservableProperty] public partial StatusBarInfo Status { get; set; }
-        partial void OnStatusChanged(StatusBarInfo value)
+
+        public StatusBarInfo Status 
         {
-            StatusBarText = value.InfoText;
-            StatusBarColor = value.StatusType switch
+            set
             {
-                StatusBarInfoType.None => Brushes.Transparent,
-                StatusBarInfoType.Succeeded => Brushes.LightSeaGreen,
-                StatusBarInfoType.Warning => Brushes.LightYellow,
-                StatusBarInfoType.Errored => Brushes.IndianRed,
-                _ => Brushes.Transparent,
-            };
+                StatusBarText = $" [{DateTime.Now:HH:mm:ss.fff}] "+ value.InfoText;
+                StatusBarColor = value.StatusType switch
+                {
+                    StatusBarInfoType.None => Brushes.Transparent,
+                    StatusBarInfoType.Succeeded => Brushes.LightSeaGreen,
+                    StatusBarInfoType.Warning => Brushes.Yellow,
+                    StatusBarInfoType.Errored => Brushes.IndianRed,
+                    _ => Brushes.Transparent,
+                };
+            }
         }
 
         public ObservableCollection<string> Pages { get; set; } = ["Data", "Calendar"];
@@ -50,6 +53,7 @@ namespace GDUTClassHelper.Desktop.ViewModel
         public MainWindowVM()
         {
             SelectedItem = Pages[0];
+            Status = new StatusBarInfo("就绪");
         }
 #pragma warning restore CS9264
     }

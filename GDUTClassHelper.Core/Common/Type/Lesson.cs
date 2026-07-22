@@ -18,6 +18,7 @@ public struct Lesson()
     [JsonInclude] public int LessonSequence;
     [JsonInclude] public string LessonType = string.Empty;
     [JsonInclude] public string Profile = string.Empty;
+    [JsonInclude] public int Number = -1;
 
     public override readonly string ToString()
     {

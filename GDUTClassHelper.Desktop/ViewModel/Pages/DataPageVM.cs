@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -40,35 +41,37 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
                 if (!string.IsNullOrEmpty(fileName))
                 {
                     string f = File.ReadAllText(fileName);
-                    string error = string.Empty;
-                    if (Path.GetExtension(fileName).CompareTo(".json") == 0)
+                    List<string> errors = [];
+                    bool success = false;
+                    if (Path.GetExtension(fileName) == ".json")
                     {
-                        try { lessons = LessonCollection.ReadFromJsonWithHeader(f); }
-                        catch
+                        try { lessons = LessonCollection.ReadFromJsonWithHeader(f); success = true; }
+                        catch (Exception e) { errors.Add(e.Message); }
+                        if (!success)
                         {
-                            try { lessons = LessonCollection.ReadFromJson(f); }
-                            catch (Exception e) { error = e.Message; }
+                            try { lessons = LessonCollection.ReadFromJson(f); success = true; }
+                            catch (Exception e) { errors.Add(e.Message); }
                         }
                     }
                     else
                     {
-                        try { lessons = LessonCollection.ReadFromText(f); }
-                        catch (Exception e) { error = e.Message; }
+                        try { lessons = LessonCollection.ReadFromText(f); success = true; }
+                        catch (Exception e) { errors.Add(e.Message); }
                     }
-                    
-                    if (lessons.Count > 0) mainVM.Status = new("解析完成，请及时保存数据，否则可能会被后续数据覆盖", StatusBarInfoType.Succeeded);
-                    else mainVM.Status = new($"读取时发生错误。{error}", StatusBarInfoType.Errored);
+                    Debug.WriteLine(f);
+                    if (success) mainVM.Status = new("解析完成，请及时保存数据，否则可能会被后续数据覆盖", StatusBarInfoType.Warning);
+                    else mainVM.Status = new($"读取时发生错误。{string.Join("; ", errors)}", StatusBarInfoType.Errored);
                 }
+                RefreshFileNameList();
             }
-            RefreshFileNameList();
         }
 
         [RelayCommand]
-        private void SaveData()
+        private void SaveData(string? path = null)
         {
             try
             {
-                lessons.Save(Path.Combine(App.DataFileDir, SaveFileName));
+                lessons.Save(path ?? Path.Combine(App.DataFileDir, SaveFileName));
                 mainVM.Status = new($"保存成功", StatusBarInfoType.Succeeded);
                 RefreshFileNameList();
             }
@@ -88,11 +91,64 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
                 var index = App.DataFileDir.Length + 1;
                 foreach (var item in f)
                 {
-                    using FileStream fileStream = new(item, FileMode.Open, FileAccess.Read, FileShare.Read, sizeof(int));
-                    using BinaryReader reader = new(fileStream);
-                    FileNameList.Add(new(item[index..], (Status)reader.ReadInt32()));
+                    FileNameList.Add(new(item[index..], LessonCollection.GetStatusFromFile(item)));
                 }
             }
+        }
+
+        [RelayCommand]
+        private void MergeIntoSeletedFile()
+        {
+            var selected = FileNameList.Where(f => f.IsSelected).ToList();
+            Debug.WriteLine(selected.Count);
+            if (selected.Count != 1)
+            {
+                mainVM.Status = new($"只有在选择一个文件时才可以进行执行操作，当前选择了 {selected.Count} 个", StatusBarInfoType.Errored);
+                return;
+            }
+            var path = Path.Combine(App.DataFileDir, selected.FirstOrDefault()!.Name);
+            LessonCollection l;
+            try { l = LessonCollection.Load(path); }
+            catch (Exception e)
+            {
+                mainVM.Status = new($"读取时发生错误。{e.Message}", StatusBarInfoType.Errored);
+                return;
+            }
+            if (l.Status == Status.Complete)
+            {
+                mainVM.Status = new("无法将数据合并进入已完善的文件", StatusBarInfoType.Errored);
+                return;
+            }
+            BitArray? d = l.GetReadFlag();
+            if (d is not null && lessons.Total != 0)
+            {
+                if (d.Count != lessons.Total)
+                {
+                    mainVM.Status = new("二者数据上限不一致，请检查数据是否有误", StatusBarInfoType.Errored);
+                }
+                foreach (var item in lessons)
+                {
+                    if (!d[item.Number - 1])
+                    {
+                        l.Add(item);
+                    }
+                }
+                l.Status = (l.Total == l.Count) ? Status.Complete : Status.Incomplete;
+            }
+            else if (d is not null && lessons.Total == 0)
+            {
+                foreach (var item in lessons.Lessons) l.Add(item);
+                l.Total = 0;
+                l.Status = l.Count == d.Length ? Status.Complete : Status.Indeterminate;
+            }
+            else
+            {
+                foreach (var item in lessons.Lessons) l.Add(item);
+                l.Total = 0;
+                l.Status = Status.Indeterminate;
+            }
+            lessons = l;
+            SaveData(path);
         }
 
         [RelayCommand]
@@ -117,7 +173,7 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
         }
     }
 
-    public struct ItemsControlItem(string name, Status status = Status.Indeterminate, bool isSelected = false)
+    public class ItemsControlItem(string name, Status status = Status.Indeterminate, bool isSelected = false)
     {
         public string Name { get; set; } = name;
         public Status Status { get; set; } = status;

@@ -23,7 +23,7 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             {
                 string f = File.ReadAllText(value);
                 _lessons = [];
-                if (Path.GetExtension(value).CompareTo(".json") == 0)
+                if (Path.GetExtension(value) == ".json")
                 {
                     try { _lessons = LessonCollection.ReadFromJsonWithHeader(f); }
                     catch
