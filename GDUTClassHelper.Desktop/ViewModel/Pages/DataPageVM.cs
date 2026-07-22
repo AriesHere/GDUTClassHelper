@@ -59,8 +59,8 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
                         catch (Exception e) { errors.Add(e.Message); }
                     }
                     Debug.WriteLine(f);
-                    if (success) mainVM.Status = new("解析完成，请及时保存数据，否则可能会被后续数据覆盖", StatusBarInfoType.Warning);
-                    else mainVM.Status = new($"读取时发生错误。{string.Join("; ", errors)}", StatusBarInfoType.Errored);
+                    if (success) mainVM.Status = new() { InfoText = "解析完成，请及时保存数据，否则可能会被后续数据覆盖", StatusType = StatusBarInfoType.Warning };
+                    else mainVM.Status = new() { InfoText = $"读取时发生错误。{string.Join("; ", errors)}", StatusType = StatusBarInfoType.Errored };
                 }
                 RefreshFileNameList();
             }
@@ -72,12 +72,12 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             try
             {
                 lessons.Save(path ?? Path.Combine(App.DataFileDir, SaveFileName));
-                mainVM.Status = new($"保存成功", StatusBarInfoType.Succeeded);
+                mainVM.Status = new() { InfoText = "保存成功", StatusType = StatusBarInfoType.Succeeded };
                 RefreshFileNameList();
             }
             catch (Exception e)
             {
-                mainVM.Status = new($"保存失败。{e.Message}", StatusBarInfoType.Errored);
+                mainVM.Status = new() { InfoText = $"保存失败。{e.Message}", StatusType = StatusBarInfoType.Errored };
             }
         }
 
@@ -103,7 +103,7 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             Debug.WriteLine(selected.Count);
             if (selected.Count != 1)
             {
-                mainVM.Status = new($"只有在选择一个文件时才可以进行执行操作，当前选择了 {selected.Count} 个", StatusBarInfoType.Errored);
+                mainVM.Status = new() { InfoText = $"只有在选择一个文件时才可以进行执行操作，当前选择了 {selected.Count} 个", StatusType = StatusBarInfoType.Errored };
                 return;
             }
             var path = Path.Combine(App.DataFileDir, selected.FirstOrDefault()!.Name);
@@ -111,12 +111,12 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             try { l = LessonCollection.Load(path); }
             catch (Exception e)
             {
-                mainVM.Status = new($"读取时发生错误。{e.Message}", StatusBarInfoType.Errored);
+                mainVM.Status = new() { InfoText = $"读取时发生错误。{e.Message}", StatusType = StatusBarInfoType.Errored };
                 return;
             }
             if (l.Status == Status.Complete)
             {
-                mainVM.Status = new("无法将数据合并进入已完善的文件", StatusBarInfoType.Errored);
+                mainVM.Status = new() { InfoText = "无法将数据合并进入已完善的文件", StatusType = StatusBarInfoType.Errored };
                 return;
             }
             BitArray? d = l.GetReadFlag();
@@ -124,7 +124,7 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             {
                 if (d.Count != lessons.Total)
                 {
-                    mainVM.Status = new("二者数据上限不一致，请检查数据是否有误", StatusBarInfoType.Errored);
+                    mainVM.Status = new() { InfoText = "二者数据上限不一致，请检查数据是否有误", StatusType = StatusBarInfoType.Errored };
                 }
                 foreach (var item in lessons)
                 {
@@ -159,16 +159,16 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
                 try
                 {
                     Process.Start(new ProcessStartInfo(App.DataFileDir) { UseShellExecute = true });
-                    mainVM.Status = new("", StatusBarInfoType.None);
+                    mainVM.Status = new() {  };
                 }
                 catch (Exception e)
                 {
-                    mainVM.Status = new($"打开失败。{e.Message}", StatusBarInfoType.Errored);
+                    mainVM.Status = new() { InfoText = $"打开失败。{e.Message}", StatusType = StatusBarInfoType.Errored };
                 }
             }
             else
             {
-                mainVM.Status = new("目标文件夹不存在", StatusBarInfoType.Errored);
+                mainVM.Status = new() { InfoText = "目标文件夹不存在", StatusType = StatusBarInfoType.Errored };
             }
         }
     }

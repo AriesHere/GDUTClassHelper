@@ -40,7 +40,7 @@ namespace GDUTClassHelper.Desktop.ViewModel
                 {
                     StatusBarInfoType.None => Brushes.Transparent,
                     StatusBarInfoType.Succeeded => Brushes.LightSeaGreen,
-                    StatusBarInfoType.Warning => Brushes.Yellow,
+                    StatusBarInfoType.Warning => Brushes.Gold,
                     StatusBarInfoType.Errored => Brushes.IndianRed,
                     _ => Brushes.Transparent,
                 };
@@ -53,15 +53,15 @@ namespace GDUTClassHelper.Desktop.ViewModel
         public MainWindowVM()
         {
             SelectedItem = Pages[0];
-            Status = new StatusBarInfo("就绪");
+            Status = new StatusBarInfo();
         }
 #pragma warning restore CS9264
     }
 
-    public struct StatusBarInfo(string text = "", StatusBarInfoType type = StatusBarInfoType.None)
+    public class StatusBarInfo
     {
-        public string InfoText = text;
-        public StatusBarInfoType StatusType = type;
+        public string InfoText = "就绪";
+        public StatusBarInfoType StatusType = StatusBarInfoType.None;
     }
 
     public enum StatusBarInfoType
