@@ -3,8 +3,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using GDUTClassHelper.Desktop.Common.Bases;
-using GDUTClassHelper.Desktop.View.Pages;
 using GDUTClassHelper.Desktop.ViewModel.Pages;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GDUTClassHelper.Desktop.ViewModel
 {
@@ -13,17 +13,15 @@ namespace GDUTClassHelper.Desktop.ViewModel
         [ObservableProperty] public partial string SelectedItem { get; set; }
         partial void OnSelectedItemChanged(string value)
         {
-            Type? t = Type.GetType("GDUTClassHelper.Desktop.View.Pages." + value + "Page");
-            if (t is not null)
+            Type? vt = Type.GetType("GDUTClassHelper.Desktop.View.Pages." + value + "Page");
+            Type? vmt = Type.GetType("GDUTClassHelper.Desktop.ViewModel.Pages." + value + "PageVM");
+            if (vt is not null)
             {
-                CurrentPage = (Page)Activator.CreateInstance(t)!;
-                if (CurrentPage is CalendarPage)
+                CurrentPage = (Page)Activator.CreateInstance(vt)!;
+                CurrentPage.DataContext = App.ServiceProvider.GetRequiredService(vmt!);
+                if (CurrentPage.DataContext is CalendarPageVM v)
                 {
-                    CurrentPage.DataContext = new CalendarPageVM();
-                }
-                else if (CurrentPage is DataPage)
-                {
-                    CurrentPage.DataContext = new DataPageVM(this);
+                    v.RefreshLessons();
                 }
             }
         }
@@ -52,7 +50,6 @@ namespace GDUTClassHelper.Desktop.ViewModel
 #pragma warning disable CS9264
         public MainWindowVM()
         {
-            SelectedItem = Pages[0];
             Status = new StatusBarInfo();
         }
 #pragma warning restore CS9264

@@ -100,9 +100,9 @@ namespace GDUTClassHelper.Core.Common.Type
             return collection;
         }
 
-        public static LessonCollection ReadFromJsonWithHeader(string jsonString, LessonCollection? lessons = null)
+        public static LessonCollection ReadFromJsonWithHeader(string jsonString)
         {
-            lessons ??= [];
+            LessonCollection lessons = [];
             LessonJsonWithHeader? json;
             json = JsonSerializer.Deserialize<LessonJsonWithHeader>(jsonString);
             if (json is not null)
@@ -117,7 +117,6 @@ namespace GDUTClassHelper.Core.Common.Type
         public static LessonCollection ReadFromJson(string jsonString)
         {
             LessonCollection lessons = [];
-            Debug.WriteLine(jsonString);
             List<LessonJson>? json;
             json = JsonSerializer.Deserialize<List<LessonJson>>(jsonString);
             if (json is not null)

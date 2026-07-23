@@ -20,6 +20,7 @@
         <converter:DivideBy7Converter x:Key="DivideBy7Converter"/>
         <converter:SessionToHeightConverter x:Key="SessionToHeightConverter"/>
         <converter:SessionToTopConverter x:Key="SessionToTopConverter"/>
+        <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
         <Style x:Key="DayOfWeekHeaderStyle" TargetType="TextBlock">
             <Setter Property="Width" Value="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}, Converter={StaticResource DivideBy7Converter}}"/>
@@ -63,41 +64,85 @@
         </Style>
     </Page.Resources>
 
-    <Grid ColumnDefinitions="*,auto,*">
-        <Canvas Grid.Column="0">
-            <StackPanel Name="CalendarHeader" Orientation="Horizontal">
-                <TextBlock Text="Mon" ap:ValueTypesHelper.Int="0" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Tue" ap:ValueTypesHelper.Int="1" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Wed" ap:ValueTypesHelper.Int="2" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Thu" ap:ValueTypesHelper.Int="3" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Fri" ap:ValueTypesHelper.Int="4" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Sat" ap:ValueTypesHelper.Int="5" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-                <TextBlock Text="Sun" ap:ValueTypesHelper.Int="6" Style="{StaticResource DayOfWeekHeaderStyle}"/>
-            </StackPanel>
-            <ItemsControl ItemsSource="{Binding ThisWeekLessons}"
-                          Canvas.Top="{Binding ActualHeight, ElementName=CalendarHeader}"
-                          ItemContainerStyle="{StaticResource LessonContainerStyle}"
-                          Name="LessonsContainer">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}"
-                                Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Canvas}}"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <ItemContainerTemplate>
-                        <Border Padding="1">
-                            <StackPanel Background="Cornsilk">
-                                <TextBlock Text="{Binding Name}"/>
-                                <TextBlock Text="{Binding Teacher}"/>
-                            </StackPanel>
-                        </Border>
-                    </ItemContainerTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </Canvas>
-        <StackPanel Grid.Column="1">
-            <!-- TODO -->
+    <Grid RowDefinitions="auto,*">
+        <StackPanel>
+            
         </StackPanel>
+        <Grid Grid.Row="1" ColumnDefinitions="*,auto,*">
+            <Canvas Grid.Column="0">
+                <StackPanel Name="CalendarHeaderL" Orientation="Horizontal">
+                    <TextBlock Text="Mon" ap:ValueTypesHelper.Int="0" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Tue" ap:ValueTypesHelper.Int="1" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Wed" ap:ValueTypesHelper.Int="2" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Thu" ap:ValueTypesHelper.Int="3" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Fri" ap:ValueTypesHelper.Int="4" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Sat" ap:ValueTypesHelper.Int="5" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Sun" ap:ValueTypesHelper.Int="6" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding ThisWeekLessonsL}"
+                              Canvas.Top="{Binding ActualHeight, ElementName=CalendarHeaderL}"
+                              ItemContainerStyle="{StaticResource LessonContainerStyle}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}"
+                                    Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Canvas}}"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <ItemContainerTemplate>
+                            <Border Padding="1">
+                                <StackPanel Background="Cornsilk">
+                                    <TextBlock Text="冲突" Background="PaleVioletRed" Visibility="{Binding IsConflict, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding Teacher}"/>
+                                </StackPanel>
+                            </Border>
+                        </ItemContainerTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Canvas>
+            <StackPanel Grid.Column="1" Background="LightGray" MinWidth="64">
+                <Button Content="上一周" Command="{Binding PrevWeekCommand}"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="周数:"/>
+                    <TextBox Text="{Binding Week}" InputScope="Number"/>
+                </StackPanel>
+                <Button Content="下一周" Command="{Binding NextWeekCommand}"/>
+                <TextBlock Text="总冲突数:"/>
+                <TextBlock Text="{Binding TotalConflict}" InputScope="Number" TextAlignment="Center"/>
+            </StackPanel>
+            <Canvas Grid.Column="2">
+                <StackPanel Name="CalendarHeaderR" Orientation="Horizontal">
+                    <TextBlock Text="Mon" ap:ValueTypesHelper.Int="0" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Tue" ap:ValueTypesHelper.Int="1" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Wed" ap:ValueTypesHelper.Int="2" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Thu" ap:ValueTypesHelper.Int="3" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Fri" ap:ValueTypesHelper.Int="4" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Sat" ap:ValueTypesHelper.Int="5" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                    <TextBlock Text="Sun" ap:ValueTypesHelper.Int="6" Style="{StaticResource DayOfWeekHeaderStyle}"/>
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding ThisWeekLessonsR}"
+                              Canvas.Top="{Binding ActualHeight, ElementName=CalendarHeaderR}"
+                              ItemContainerStyle="{StaticResource LessonContainerStyle}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}"
+                                    Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Canvas}}"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <ItemContainerTemplate>
+                            <Border Padding="1">
+                                <StackPanel Background="Cornsilk">
+                                    <TextBlock Text="冲突" Background="PaleVioletRed" Visibility="{Binding IsConflict, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding Teacher}"/>
+                                </StackPanel>
+                            </Border>
+                        </ItemContainerTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Canvas>
+        </Grid>
     </Grid>
 </Page>

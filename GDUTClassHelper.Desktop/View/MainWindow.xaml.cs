@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using GDUTClassHelper.Desktop.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GDUTClassHelper.Desktop.View
 {
@@ -11,7 +12,7 @@ namespace GDUTClassHelper.Desktop.View
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = new MainWindowVM();
+            this.DataContext = App.ServiceProvider.GetRequiredService<MainWindowVM>();
         }
     }
 }

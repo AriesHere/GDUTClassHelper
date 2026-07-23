@@ -1,59 +1,111 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using GDUTClassHelper.Core.Common.Type;
 using GDUTClassHelper.Desktop.Common.Bases;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GDUTClassHelper.Desktop.ViewModel.Pages
 {
     public partial class CalendarPageVM : ViewModelBase
     {
-        private LessonCollection _lessons = [];
+        public MainWindowVM mainVM;
+        public List<(string FileName, LessonCollection Lessons)> LessonsCollectionList = [];
 
-        public ObservableCollection<LessonWrapper> ThisWeekLessons { get; private set; } = [];
+        public ObservableCollection<LessonWrapper> ThisWeekLessonsL { get; private set; } = [];
+        public ObservableCollection<LessonWrapper> ThisWeekLessonsR { get; private set; } = [];
 
         [ObservableProperty] public partial int Week { get; set; }
+        [ObservableProperty] public partial int TotalConflict { get; set; }
         partial void OnWeekChanged(int value) => UpdateThisWeekLessons(value);
 
-        [ObservableProperty] public partial string CurrentFilePath { get; set; } = string.Empty;
-        partial void OnCurrentFilePathChanged(string value)
+        public CalendarPageVM()
         {
-            if (!string.IsNullOrEmpty(value))
-            {
-                string f = File.ReadAllText(value);
-                _lessons = [];
-                if (Path.GetExtension(value) == ".json")
-                {
-                    try { _lessons = LessonCollection.ReadFromJsonWithHeader(f); }
-                    catch
-                    {
-                        try { _lessons = LessonCollection.ReadFromJson(f); }
-                        catch { }
-                    }
-                }
-                else
-                {
-                    try { _lessons = LessonCollection.ReadFromText(f); }
-                    catch { }
-                }
-                if (_lessons.Count > 0) UpdateThisWeekLessons(1);
-            }
+            this.mainVM = App.ServiceProvider.GetRequiredService<MainWindowVM>();
+            RefreshLessons();
         }
 
-        private void UpdateThisWeekLessons(int week)
+        [RelayCommand]
+        private void PrevWeek() { if (Week > 1) Week--; }
+
+        [RelayCommand]
+        private void NextWeek() => Week++;
+
+        public void RefreshLessons()
         {
-            ThisWeekLessons.Clear();
-            foreach (var lesson in _lessons)
+            try { LessonsCollectionList = App.ServiceProvider.GetRequiredService<DataPageVM>().GetLessonsList(); }
+            catch (Exception e) { mainVM.Status = new() { InfoText = $"读取数据时发生错误。{e.Message}", StatusType = StatusBarInfoType.Errored }; }
+            if (LessonsCollectionList.Count == 2)
             {
-                if (lesson.Week == week)
+                var listA = LessonsCollectionList[0].Lessons;
+                var listB = LessonsCollectionList[1].Lessons;
+                var groupsA = listA.GroupBy(l => l.Week).ToDictionary(g => g.Key);
+                var groupsB = listB.GroupBy(l => l.Week).ToDictionary(g => g.Key);
+                int total = 0;
+                foreach (var week in groupsA.Keys.Intersect(groupsB.Keys))
                 {
-                    ThisWeekLessons.Add(new(lesson));
+                    var lessonsInA = groupsA[week];
+                    var lessonsInB = groupsB[week];
+                    foreach (var lessonA in lessonsInA)
+                    {
+                        foreach (var lessonB in lessonsInB)
+                        {
+                            if (lessonA.DayOfWeek == lessonB.DayOfWeek
+                                && lessonA.Sessions.Intersect(lessonB.Sessions).Any())
+                            {
+                                total++;
+                            }
+                        }
+                    }
                 }
-                else if (lesson.Week > week)
+                TotalConflict = total;
+            }
+            else
+            {
+                TotalConflict = 0;
+            }
+            UpdateThisWeekLessons();
+        }
+
+        private void UpdateThisWeekLessons(int week = 1)
+        {
+            var count = LessonsCollectionList.Count;
+            if (count > 0)
+            {
+                ThisWeekLessonsL.Clear();
+                foreach (var lesson in LessonsCollectionList[0].Lessons)
                 {
-                    break;
+                    if (lesson.Week == week)
+                        ThisWeekLessonsL.Add(new(lesson));
+                    else if (lesson.Week > week)
+                        break;
                 }
+            }
+            if (count > 1)
+            {
+                ThisWeekLessonsR.Clear();
+                foreach (var lesson in LessonsCollectionList[1].Lessons)
+                {
+                    if (lesson.Week == week)
+                        ThisWeekLessonsR.Add(new(lesson));
+                    else if (lesson.Week > week)
+                        break;
+                }
+                foreach (var itemL in ThisWeekLessonsL)
+                {
+                    foreach (var itemR in ThisWeekLessonsR)
+                    {
+                        if (itemL.DayOfWeek == itemR.DayOfWeek
+                            && itemL.Sessions.Intersect(itemR.Sessions).Any())
+                        {
+                            itemL.IsConflict = itemR.IsConflict = true;
+                        }
+                    }
+                }
+            }
+            if (count > 2)
+            {
+                mainVM.Status = new() { InfoText = "在 Data 页面中选择了超过两个数据，此处最多只能显示两个，建议只选择两个数据", StatusType = StatusBarInfoType.Warning };
             }
         }
     }
