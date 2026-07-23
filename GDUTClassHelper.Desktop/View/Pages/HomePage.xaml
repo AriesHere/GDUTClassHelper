@@ -13,6 +13,7 @@
     <Grid>
         <StackPanel Margin="4">
             <TextBlock Text="GDUTClassHelper" FontSize="20"/>
+            <TextBlock Text="版本: v1.0.0"/>
             <TextBlock>
                 作者:
                 <Hyperlink Command="{Binding OpenWebsiteCommand}" Style="{x:Null}" CommandParameter="https://github.com/AriesHere">
@@ -37,6 +38,7 @@
                     https://github.com/AriesHere/GDUTClassHelper/issues
                 </Hyperlink>
             </TextBlock>
+            <TextBlock Text="点击侧边栏切换页面"/>
         </StackPanel>
     </Grid>
 </Page>
