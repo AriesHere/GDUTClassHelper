@@ -15,14 +15,13 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
         public ObservableCollection<LessonWrapper> ThisWeekLessonsL { get; private set; } = [];
         public ObservableCollection<LessonWrapper> ThisWeekLessonsR { get; private set; } = [];
 
-        [ObservableProperty] public partial int Week { get; set; }
+        [ObservableProperty] public partial int Week { get; set; } = 1;
         [ObservableProperty] public partial int TotalConflict { get; set; }
         partial void OnWeekChanged(int value) => UpdateThisWeekLessons(value);
 
         public CalendarPageVM()
         {
             this.mainVM = App.ServiceProvider.GetRequiredService<MainWindowVM>();
-            RefreshLessons();
         }
 
         [RelayCommand]
@@ -70,9 +69,10 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
         private void UpdateThisWeekLessons(int week = 1)
         {
             var count = LessonsCollectionList.Count;
+            ThisWeekLessonsL.Clear();
+            ThisWeekLessonsR.Clear();
             if (count > 0)
             {
-                ThisWeekLessonsL.Clear();
                 foreach (var lesson in LessonsCollectionList[0].Lessons)
                 {
                     if (lesson.Week == week)
@@ -83,7 +83,6 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             }
             if (count > 1)
             {
-                ThisWeekLessonsR.Clear();
                 foreach (var lesson in LessonsCollectionList[1].Lessons)
                 {
                     if (lesson.Week == week)

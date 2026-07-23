@@ -104,7 +104,7 @@ namespace GDUTClassHelper.Core.Common.Type
         {
             LessonCollection lessons = [];
             LessonJsonWithHeader? json;
-            json = JsonSerializer.Deserialize<LessonJsonWithHeader>(jsonString);
+            json = JsonSerializer.Deserialize(jsonString, GlobalJsonContext.Context.LessonJsonWithHeader);
             if (json is not null)
             {
                 foreach (var item in json.rows) lessons.Add(item);
@@ -118,7 +118,7 @@ namespace GDUTClassHelper.Core.Common.Type
         {
             LessonCollection lessons = [];
             List<LessonJson>? json;
-            json = JsonSerializer.Deserialize<List<LessonJson>>(jsonString);
+            json = JsonSerializer.Deserialize(jsonString, GlobalJsonContext.Context.ListLessonJson);
             if (json is not null)
             {
                 foreach (var item in json) lessons.Add(item);
@@ -135,7 +135,11 @@ namespace GDUTClassHelper.Core.Common.Type
             w.Write((int)this.Status);
             w.Write(this.Total);
             w.Write(this.FirstDate.DayNumber);
-            var lessonJson = JsonSerializer.Serialize(this.Lessons, StringHelper.SerializerOptions);
+            using var stream = new MemoryStream();
+            JsonSerializer.Serialize(stream, this.Lessons, GlobalJsonContext.Context.ListLesson);
+            stream.Position = 0;
+            using var reader = new StreamReader(stream);
+            var lessonJson = reader.ReadToEnd();
             w.Write(lessonJson);
         }
 
@@ -147,7 +151,7 @@ namespace GDUTClassHelper.Core.Common.Type
             l.Status = (Status)w.ReadInt32();
             l.Total = w.ReadInt32();
             l.FirstDate = DateOnly.FromDayNumber(w.ReadInt32());
-            l.Lessons = JsonSerializer.Deserialize<List<Lesson>>(w.ReadString())!;
+            l.Lessons = JsonSerializer.Deserialize(w.ReadString(), GlobalJsonContext.Context.ListLesson)!;
             return l;
         }
 

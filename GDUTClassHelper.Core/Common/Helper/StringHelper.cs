@@ -1,19 +1,7 @@
-﻿using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Unicode;
-
-namespace GDUTClassHelper.Core.Common.Helper;
+﻿namespace GDUTClassHelper.Core.Common.Helper;
 
 public static class StringHelper
 {
-    public static readonly JsonSerializerOptions SerializerOptions = new()
-        {
-            Encoder = JavaScriptEncoder.Create(
-                UnicodeRanges.BasicLatin,
-                UnicodeRanges.CjkUnifiedIdeographs,
-                UnicodeRanges.CjkSymbolsandPunctuation)
-        };
-
     /// <summary>Quotes must be paired. Escaped quotes are not handled.</summary>
     public static List<string> ExtractQuotedStrings(string source)
     {

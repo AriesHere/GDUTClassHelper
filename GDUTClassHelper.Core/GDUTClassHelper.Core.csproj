@@ -4,7 +4,14 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;SelfContained</Configurations>
   </PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
+	</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Ical.Net" Version="5.2.3" />
