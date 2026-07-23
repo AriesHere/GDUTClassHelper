@@ -13,15 +13,30 @@
     <Grid>
         <StackPanel Margin="4">
             <TextBlock Text="GDUTClassHelper" FontSize="20"/>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock>
-                    作者:
-                    <Hyperlink Command="{Binding OpenWebsiteCommand}" Style="{x:Null}" CommandParameter="https://github.com/AriesHere">
-                        AriesHere
-                    </Hyperlink>
-                </TextBlock>
-            </StackPanel>
-
+            <TextBlock>
+                作者:
+                <Hyperlink Command="{Binding OpenWebsiteCommand}" Style="{x:Null}" CommandParameter="https://github.com/AriesHere">
+                    AriesHere
+                </Hyperlink>
+            </TextBlock>
+            <TextBlock>
+                仓库:
+                <Hyperlink Command="{Binding OpenWebsiteCommand}" Style="{x:Null}" CommandParameter="https://github.com/AriesHere/GDUTClassHelper">
+                    https://github.com/AriesHere/GDUTClassHelper
+                </Hyperlink>
+            </TextBlock>
+            <TextBlock>
+                LICENSE:
+                <Hyperlink Command="{Binding OpenWebsiteCommand}" Style="{x:Null}" CommandParameter="https://github.com/AriesHere/GDUTClassHelper/blob/main/LICENSE">
+                    https://github.com/AriesHere/GDUTClassHelper/blob/main/LICENSE
+                </Hyperlink>
+            </TextBlock>
+            <TextBlock>
+                建议 / Bug 反馈:
+                <Hyperlink Command="{Binding OpenWebsiteCommand}" Style="{x:Null}" CommandParameter="https://github.com/AriesHere/GDUTClassHelper/issues">
+                    https://github.com/AriesHere/GDUTClassHelper/issues
+                </Hyperlink>
+            </TextBlock>
         </StackPanel>
     </Grid>
 </Page>
