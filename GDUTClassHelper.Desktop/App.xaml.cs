@@ -23,6 +23,7 @@ namespace GDUTClassHelper.Desktop
             sc.AddSingleton<MainWindowVM>();
             sc.AddSingleton<CalendarPageVM>();
             sc.AddSingleton<DataPageVM>();
+            sc.AddSingleton<HomePageVM>();
             ServiceProvider = sc.BuildServiceProvider();
         }
     }

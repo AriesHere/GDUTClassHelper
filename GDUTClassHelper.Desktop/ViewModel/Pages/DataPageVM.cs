@@ -158,7 +158,7 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
                 try
                 {
                     Process.Start(new ProcessStartInfo(App.DataFileDir) { UseShellExecute = true });
-                    mainVM.Status = new() {  };
+                    mainVM.Status = new() { };
                 }
                 catch (Exception e)
                 {

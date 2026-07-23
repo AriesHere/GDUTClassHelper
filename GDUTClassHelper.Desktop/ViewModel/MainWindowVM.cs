@@ -45,11 +45,12 @@ namespace GDUTClassHelper.Desktop.ViewModel
             }
         }
 
-        public ObservableCollection<string> Pages { get; set; } = ["Data", "Calendar"];
+        public ObservableCollection<string> Pages { get; set; } = ["Home", "Data", "Calendar"];
 
 #pragma warning disable CS9264
         public MainWindowVM()
         {
+            SelectedItem = Pages[0];
             Status = new StatusBarInfo();
         }
 #pragma warning restore CS9264
