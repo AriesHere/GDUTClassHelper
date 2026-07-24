@@ -121,9 +121,10 @@ namespace GDUTClassHelper.Desktop.ViewModel.Pages
             BitArray? d = l.GetReadFlag();
             if (d is not null && Lessons.Total != 0)
             {
-                if (d.Count != Lessons.Total)
+                if (l.Total != Lessons.Total)
                 {
-                    mainVM.Status = new() { InfoText = "二者数据上限不一致，请检查数据是否有误", StatusType = StatusBarInfoType.Errored };
+                    mainVM.Status = new() { InfoText = $"二者数据上限不一致，请检查数据是否有误。传入数据的上限为{Lessons.Total}，选择文件的上限为{l.Total}", StatusType = StatusBarInfoType.Errored };
+                    return;
                 }
                 foreach (var item in Lessons)
                 {

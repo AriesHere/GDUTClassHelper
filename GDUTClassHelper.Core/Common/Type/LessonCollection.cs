@@ -57,9 +57,9 @@ namespace GDUTClassHelper.Core.Common.Type
 
         #region Read
 
-        public static LessonCollection ReadFromText(string path)
+        public static LessonCollection ReadFromText(string text)
         {
-            using TextReader reader = new StreamReader(path);
+            using StringReader reader = new(text);
             LessonCollection collection = [];
             bool flag = true; 
             reader.ReadLine();  // Skip header line

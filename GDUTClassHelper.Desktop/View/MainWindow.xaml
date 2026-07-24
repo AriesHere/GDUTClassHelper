@@ -13,9 +13,9 @@
             <ListBox Grid.Column="0" SelectedItem="{Binding SelectedItem}" ItemsSource="{Binding Pages}"/>
             <Frame Grid.Column="1" NavigationUIVisibility="Hidden" Content="{Binding CurrentPage}"/>
         </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="auto,*">
+        <Grid Grid.Row="1" ColumnDefinitions="auto,*" Background="White" Height="16">
             <Rectangle Grid.Column="0" Fill="{Binding StatusBarColor}" Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"/>
-            <TextBlock Grid.Column="1" Text="{Binding StatusBarText}" HorizontalAlignment="Stretch"/>
+            <TextBlock Grid.Column="1" Text="{Binding StatusBarText}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
         </Grid>
     </Grid>
 </Window>
